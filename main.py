@@ -1,6 +1,13 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.optim as optim
+import matplotlib.pyplot as plt
+import torchvision
+import numpy as np
+
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader, random_split
 
 class LeNet5(nn.Module):
     def __init__(self, num_of_classes, p): # 'p' probability of an element being zeroed out
