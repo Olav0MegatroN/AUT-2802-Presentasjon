@@ -44,16 +44,40 @@ class LeNet5(nn.Module):
         # Flatten the output from the convolutional layers
         x = x.view(-1, 16 * 5 * 5)
         # Layer 3: Fully Connected + BatchNorm + Activation
+
+        '''Dropot'''
         x = F.relu(self.bn3(self.fc1(x)))
         # Apply dropout after first FC layer
+
         x = self.dropout(x)
         # Layer 4: Fully Connected +  BatchNorm + Activation
+        
+        ''''''
         x = F.relu(self.bn4(self.fc2(x)))
         # Apply dropout after second FC layer
+
         x = self.dropout(x)
         # Layer 5: Fully Connected (Output)
         x = self.fc3(x)
         return x
+
+''' MNIST images are 28x28 with one channel, so they are converted to three
+channels to match the input of the first convolutional layer. '''
+transform = transforms.Compose([
+    transforms.Grayscale(num_output_channels=3),
+    transforms.ToTensor(),
+    transforms.Normalize((0.1307,), (0.3081,))  # mean and std of the MNIST training set
+])
+
+# Download the MNIST training set and split it into training and validation sets
+dataset = datasets.MNIST(root='./data', train=True, download=True, transform=transform)
+train_dataset, val_dataset = random_split(dataset, [50000, 10000])
+
+train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False)
+
+# 10 classes (digits 0-9) and a dropout probability of 0.5
+model = LeNet5(num_of_classes=10, p=0.0)
 
 '''  Decide if the calculations are perfomed by GPU or CPU  '''
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -83,7 +107,7 @@ class EarlyStopping:
         self.best_score = None  # Tracks the best loss (lower is better)
         self.early_stop = False  # Flag for early stopping
         self.counter = 0  # Counter for epochs without improvement
-        self.best_loss = np.Inf  # Best loss starts as infinity
+        self.best_loss = np.inf # Best loss starts as infinity
 
     ''' special method that allows us to use the object as if it were a function. '''
     def __call__(self, val_loss, model):
@@ -136,7 +160,7 @@ train_accuracies = []
 val_accuracies = []
 
 # number of epochs
-num_epochs = 50
+num_epochs = 15
 for epoch in range(num_epochs):
     model.train()
     running_loss = 0.0
@@ -185,9 +209,9 @@ for epoch in range(num_epochs):
 
     early_stopping(val_loss, model)
 
-    if early_stopping.early_stop:
-      print("Early stopping")
-      break
+    #if early_stopping.early_stop:
+    #  print("Early stopping")
+    #  break
 
 # Plot training and validation loss
 plt.figure(figsize=(8,4))
